@@ -32,7 +32,7 @@ void readGrading(std::string fileName, StudentList stuList) {
 	}
 
 	std::string temp;
-
+	getline(fileIn, temp); // skip 1 row
 	while (!fileIn.eof()) {
 		getline(fileIn, temp, ','); //skip first col
 		getline(fileIn, temp, ',');
@@ -49,9 +49,9 @@ void readGrading(std::string fileName, StudentList stuList) {
 				stuList.pTail = stuList.pTail->pNextStu;
 			}
 			stuList.pTail->data.studentID = temp;
-			getline(fileIn, stuList.pTail->data.firstName, ',');
 			getline(fileIn, stuList.pTail->data.lastName, ',');
-
+			getline(fileIn, stuList.pTail->data.firstName, ',');
+			
 			for (int i = 0; i < 3; i++) getline(fileIn, temp, ',');
 		}
 		else { //add grade to existed node
@@ -66,9 +66,10 @@ void readGrading(std::string fileName, StudentList stuList) {
 		getline(fileIn, temp, ',');
 		float gpa = stof(temp);
 		getline(fileIn, temp, ',');
-		getline(fileIn, temp, '\n');
+		getline(fileIn, temp);
 		int credit = stoi(temp);
 
+		if (gpa >= 5) stuList.pTail->data.gpa.credit_Accumulated += credit;
 		if (check == 0) {
 			stuList.pTail->data.gpa.GPA_All += gpa * credit;
 			stuList.pTail->data.gpa.GPA_Foundation += gpa * credit;
@@ -82,7 +83,6 @@ void readGrading(std::string fileName, StudentList stuList) {
 			stuList.pTail->data.gpa.credits_Sub += credit;
 		}
 	}
-
 }
 
 int main() {
