@@ -25,6 +25,7 @@ struct GPA {
 	int credits_Foundation = 0;
 	int credits_General = 0;
 	int credits_Sub = 0;
+	int credit_Accumulated = 0;
 };
 
 struct Student {
@@ -61,11 +62,5 @@ struct _Major {
 	_Major* pNextMajor = nullptr;
 	_Major* pPreMajor = nullptr;
 };
-
-
-//read file 
-void readGrading(std::string fileName, StudentList stuList);
-void readInterest(std::string fileName, StudentList stuList);
-void readMajor(std::string fileName, _Major* pHead);
 
 #endif _STRUCT_H_
