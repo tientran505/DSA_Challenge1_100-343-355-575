@@ -1,5 +1,93 @@
 #include "struct.h"
 
+void fullMajorResult(_Major* head)
+{
+	std::ofstream fileName;
+	fileName.open("Result.csv");
+	_Major* curM = head;
+	while (curM != nullptr)
+	{
+		_Student* curS = curM->data.stuList->pHead;
+		while (curS != nullptr)
+		{
+			fileName << curS->data.studentID << "," << curS->data.lastName << "," << curS->data.firstName << "," << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year << ",";
+			for (int i = 0; i < 6; i++)
+			{
+				fileName << curS->data.interest.desiredMajor[i] << ",";
+			}
+			fileName << curS->data.interest.desiredMajor[curS->data.interest.chosen] << "," << curS->data.interest.chosen << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
+			curS = curS->pNextStu;
+		}
+		curM = curM->pNextMajor;
+	}
+	//in may thang rot 
+	fileName.close();
+}
+
+void resultOfOneStu(std::string ID,_Major*head)
+{
+	_Major* curM = head;
+	while (curM != nullptr)
+	{
+		_Student* curS = curM->data.stuList->pHead;
+		while (curS->data.studentID.compare(ID) != 0)
+		{
+			curS = curS->pNextStu;
+		}
+		if (curS != nullptr)
+		{
+			std::cout << "Student ID:" << curS->data.studentID;
+			std::cout << "Student name:" << curS->data.lastName << " " << curS->data.firstName;
+			std::cout << "Register date:"<< curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year;
+			std::cout << "Interests:";
+			for (int i = 0; i < 6; i++)
+			{
+				std::cout << curS->data.interest.desiredMajor[i] << ",";
+			}
+			std::cout << "Result:" << curS->data.interest.desiredMajor[curS->data.interest.chosen] << " " << curS->data.interest.chosen << " ";
+			std::cout << "GPA Foundation:" << curS->data.gpa.GPA_Foundation;
+			std::cout << "GPA All:" << curS->data.gpa.GPA_All << std::endl;
+			return;
+		}
+		else curM = curM->pNextMajor;
+	}
+	if (curM==nullptr)
+	{
+		//ua cai linkly cua may thang rot dau?
+	}
+}
+
+void resultOfOneM(std::string shortName, _Major* head)
+{
+	_Major* curM = head;
+	while (curM != nullptr && curM->data.shortName.compare(shortName) != 0)
+	{
+		curM = curM->pNextMajor;
+	}
+	if (curM != nullptr)
+	{
+		std::ofstream fileName;
+		fileName.open(shortName + ".csv");
+		_Student* curS = curM->data.stuList->pHead;
+		while (curS != nullptr)
+		{
+			fileName << curS->data.studentID << "," << curS->data.lastName << "," << curS->data.firstName << "," << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year << ",";
+			for (int i = 0; i < 6; i++)
+			{
+				fileName << curS->data.interest.desiredMajor[i] << ",";
+			}
+			fileName << curS->data.interest.desiredMajor[curS->data.interest.chosen] << "," << curS->data.interest.chosen << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
+			curS = curS->pNextStu;
+		}
+		fileName.close();
+	}
+	else
+	{
+		std::cout << "Invalid shortname";
+		return;
+	}
+}
+
 void wstringToString(std::wstring source, std::string& destination) {
 	int length = source.size();
 	for (int i = 0; i < length; i++) {
@@ -253,7 +341,7 @@ void add_Interests(std::string fileName, StudentList* studList) {
 	}
 }
 
-int main() {
+int main(int argc, char*argv[]) {
 	StudentList* list = readGrading("Grading.csv");
 	add_Interests("Interests.csv", list);
 
@@ -274,5 +362,21 @@ int main() {
 		majorList = majorList->pNextMajor;
 	}
 
+	if (argv[1] == "-all")
+	{
+		fullMajorResult(majorList);
+	}
+	else if (argv[1] == "-s")
+	{
+		resultOfOneStu(argv[2], majorList);
+	}
+	else if (argv[1] == "-m")
+	{
+		resultOfOneM(argv[2], majorList);
+	}
+	else
+	{
+		std::cout << "Invalid choice";
+	}
 	return 0;
 }
