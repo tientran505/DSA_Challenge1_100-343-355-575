@@ -50,11 +50,9 @@ struct StudentList {
 //major
 
 struct Major {
-	std::wstring name;
 	std::string shortName;
 	int quota;
-
-	StudentList stuList;
+	StudentList* stuList = nullptr;
 };
 
 struct _Major {
@@ -62,5 +60,6 @@ struct _Major {
 	_Major* pNextMajor = nullptr;
 	_Major* pPreMajor = nullptr;
 };
+
 
 #endif _STRUCT_H_
