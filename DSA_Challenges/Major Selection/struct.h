@@ -52,7 +52,7 @@ struct StudentList {
 struct Major {
 	std::string shortName;
 	int quota;
-	StudentList* stuList = nullptr;
+	StudentList stuList;
 };
 
 struct _Major {

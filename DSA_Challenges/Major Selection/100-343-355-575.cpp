@@ -7,7 +7,7 @@ void fullMajorResult(_Major* head)
 	_Major* curM = head;
 	while (curM != nullptr)
 	{
-		_Student* curS = curM->data.stuList->pHead;
+		_Student* curS = curM->data.stuList.pHead;
 		while (curS != nullptr)
 		{
 			fileName << curS->data.studentID << "," << curS->data.lastName << "," << curS->data.firstName << "," << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year << ",";
@@ -24,12 +24,12 @@ void fullMajorResult(_Major* head)
 	fileName.close();
 }
 
-void resultOfOneStu(std::string ID,_Major*head)
+void resultOfOneStu(std::string ID, _Major* head)
 {
 	_Major* curM = head;
 	while (curM != nullptr)
 	{
-		_Student* curS = curM->data.stuList->pHead;
+		_Student* curS = curM->data.stuList.pHead;
 		while (curS->data.studentID.compare(ID) != 0)
 		{
 			curS = curS->pNextStu;
@@ -38,7 +38,7 @@ void resultOfOneStu(std::string ID,_Major*head)
 		{
 			std::cout << "Student ID:" << curS->data.studentID;
 			std::cout << "Student name:" << curS->data.lastName << " " << curS->data.firstName;
-			std::cout << "Register date:"<< curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year;
+			std::cout << "Register date:" << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year;
 			std::cout << "Interests:";
 			for (int i = 0; i < 6; i++)
 			{
@@ -51,7 +51,7 @@ void resultOfOneStu(std::string ID,_Major*head)
 		}
 		else curM = curM->pNextMajor;
 	}
-	if (curM==nullptr)
+	if (curM == nullptr)
 	{
 		//ua cai linkly cua may thang rot dau?
 	}
@@ -68,7 +68,7 @@ void resultOfOneM(std::string shortName, _Major* head)
 	{
 		std::ofstream fileName;
 		fileName.open(shortName + ".csv");
-		_Student* curS = curM->data.stuList->pHead;
+		_Student* curS = curM->data.stuList.pHead;
 		while (curS != nullptr)
 		{
 			fileName << curS->data.studentID << "," << curS->data.lastName << "," << curS->data.firstName << "," << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year << ",";
@@ -88,13 +88,6 @@ void resultOfOneM(std::string shortName, _Major* head)
 	}
 }
 
-void wstringToString(std::wstring source, std::string& destination) {
-	int length = source.size();
-	for (int i = 0; i < length; i++) {
-		destination[i] = source[i];
-	}
-}
-
 int isFoundation(std::string str) { //0 foundation, 1 sub, 2 general
 	std::string temp;
 
@@ -110,6 +103,15 @@ int isFoundation(std::string str) { //0 foundation, 1 sub, 2 general
 	return 2;
 }
 
+bool operator > (GPA a, GPA b) {
+	if (a.GPA_Foundation > b.GPA_Foundation) return 1;
+	if (a.GPA_Foundation < b.GPA_Foundation) return 0;
+	if (a.GPA_All > b.GPA_All) return 1;
+	if (a.GPA_All < b.GPA_All) return 0;
+	if (a.credit_Accumulated < b.credit_Accumulated) return 1;
+	return 0;
+}
+
 int compareIDStudent(std::string std1, std::string std2) { // return 1 if std1 > std2, 2 if std1 < std2, 0 if std1 == std2
 	std::string tmp1 = std1;
 	std::string tmp2 = std2;
@@ -122,54 +124,17 @@ int compareIDStudent(std::string std1, std::string std2) { // return 1 if std1 >
 	else return 0;
 }
 
-_Student* nodeMiddle(_Student* head, _Student* tail) {
-	if (head == nullptr) return nullptr;
-	_Student* slow = head;
-	_Student* fast = head->pNextStu;
-
-	while (fast != tail) {
-		fast = fast->pNextStu;
-		if (fast != tail) {
-			slow = slow->pNextStu;
-			fast = fast->pNextStu;
-		}
-	}
-	return slow;
-}
-
-bool checkDuplicate(_Student* head, _Student* tail,_Student* stu) {
-	if (head == nullptr) return false;
-	_Student* left = head;
-	_Student* right = tail;
-	while (compareIDStudent(left->data.studentID, right->data.studentID) == 2) { // while left < right
-		_Student* mid = nodeMiddle(left, right);
-		if (compareIDStudent(mid->data.studentID, stu->data.studentID) == 2) { // if mid < stu -> left = mid + 1;
-			left = mid->pNextStu;
-		}
-
-		else if (compareIDStudent(mid->data.studentID, stu->data.studentID) == 1) { // if mid > stu -> right = mid - 1;
-			right = mid->pPreStu;
-		}
-		else return true;
-	}
-	return false;
-}
-
 _Student* findStu(_Student* head, _Student* tail, std::string stuID) {
 	if (head->data.studentID == stuID) return head;
 	if (tail->data.studentID == stuID) return tail;
 	_Student* left = head;
 	_Student* right = tail;
-
-	while (compareIDStudent(left->data.studentID, right->data.studentID) == 2) {
-		_Student* mid = nodeMiddle(left, right);
-		if (mid == nullptr) return nullptr;
-
-		if (mid->data.studentID == stuID) return mid;
-
-		else if (compareIDStudent(mid->data.studentID, stuID) == 2) left = mid->pNextStu;
-
-		else right = mid->pPreStu;
+	while (left != right || left->pNextStu != right || left->pPreStu != right) {
+		if (left->data.studentID == stuID) return left;
+		else if (right->data.studentID == stuID) return right;
+		left = left->pNextStu;
+		right = right->pPreStu;
+		if (left == nullptr || right == nullptr) return nullptr;
 	}
 	return nullptr;
 }
@@ -218,23 +183,23 @@ StudentList* readGrading(std::string fileName) {
 				pCur->pPreStu = nullptr;
 				pCur->data.studentID = temp;
 
-			//	if (strcmp(stuList->pTail->data.studentID.c_str(), pCur->data.studentID.c_str()) < 0) {
+				//	if (strcmp(stuList->pTail->data.studentID.c_str(), pCur->data.studentID.c_str()) < 0) {
 				if (compareIDStudent(stuList->pTail->data.studentID, pCur->data.studentID) == 2) {// CurID >  tail.StudentID 
 					stuList->pTail->pNextStu = pCur;
 					pCur->pPreStu = stuList->pTail;
 					stuList->pTail = pCur;
 				}
 
-			//	else if (strcmp(stuList->pHead->data.studentID.c_str(), pCur->data.studentID.c_str()) > 0) {
+				//	else if (strcmp(stuList->pHead->data.studentID.c_str(), pCur->data.studentID.c_str()) > 0) {
 				else if (compareIDStudent(stuList->pHead->data.studentID, pCur->data.studentID) == 1) { // CurID < head.StuID
 					stuList->pHead->pPreStu = pCur;
 					pCur->pNextStu = stuList->pHead;
 					stuList->pHead = pCur;
 				}
-				
+
 				else {
 					_Student* pRun = stuList->pHead;
-				//	while (strcmp(pRun->data.studentID.c_str(), pCur->data.studentID.c_str()) < 0) pRun = pRun->pNextStu;
+					//	while (strcmp(pRun->data.studentID.c_str(), pCur->data.studentID.c_str()) < 0) pRun = pRun->pNextStu;
 					while (compareIDStudent(pRun->data.studentID, pCur->data.studentID) == 2) pRun = pRun->pNextStu; // check until run > cur (while cur > run)
 					pCur->pNextStu = pRun;
 					pCur->pPreStu = pRun->pPreStu;
@@ -245,7 +210,7 @@ StudentList* readGrading(std::string fileName) {
 
 			getline(fileIn, pCur->data.lastName, ',');
 			getline(fileIn, pCur->data.firstName, ',');
-			
+
 			for (int i = 0; i < 3; i++) getline(fileIn, temp, ',');
 		}
 		else { //add grade to existed node
@@ -323,46 +288,184 @@ void add_Interests(std::string fileName, StudentList* studList) {
 
 	std::string line;
 	getline(f, line);
+	int i = 1;
 	while (!f.eof()) {
 		getline(f, line, ',');
 		if (line == "") return;
 		_Student* pCur = findStu(studList->pHead, studList->pTail, line);
+		std::string tmp = line;
 
 		if (pCur == nullptr) getline(f, line);
-
 		else {
+			std::string name1;
+			std::string name2;
+			getline(f, name1, ',');
+			getline(f, name2, ',');
+			if (pCur->pNextStu != nullptr && pCur->pNextStu->data.studentID == pCur->data.studentID && pCur->pNextStu->data.lastName == name1 && pCur->pNextStu->data.firstName == name2) pCur = pCur->pNextStu;
+			else if (pCur->pPreStu != nullptr && pCur->pPreStu->data.studentID == pCur->data.studentID && pCur->pPreStu->data.lastName == name1 && pCur->pPreStu->data.firstName == name2) pCur = pCur->pPreStu;
+
 			getline(f, line, ',');
-			if (pCur->pNextStu != nullptr && pCur->pNextStu->data.lastName == line) pCur = pCur->pNextStu;
-			else if (pCur->pPreStu != nullptr && pCur->pPreStu->data.lastName == line) pCur = pCur->pPreStu;
-			for (int i = 0; i < 2; i++) getline(f, line, ',');
 			for (int i = 0; i < 5; i++) getline(f, pCur->data.interest.desiredMajor[i], ',');
 			getline(f, pCur->data.interest.desiredMajor[5]);
+			i++;
 		}
 	}
 }
 
-int main(int argc, char*argv[]) {
-	StudentList* list = readGrading("Grading.csv");
-	add_Interests("Interests.csv", list);
+void insertIntoSortedList(StudentList& list, _Student* node) {
+	node->pNextStu = nullptr;
+	node->pPreStu = nullptr;
+	if (list.pHead == nullptr) {
+		list.pHead = node;
+		list.pTail = node;
+	}
 
-	_Major* majorList = creatMajorList("Majors.csv");
-	
-	while (list->pHead != nullptr) {
-		std::cout << "MSSV: " << list->pHead->data.studentID << " with GPA Foundation = " << list->pHead->data.gpa.GPA_Foundation;
-		std::cout << " | GPA All = " << list->pHead->data.gpa.GPA_All << std::endl;
-		std::cout << "Interests: " << std::endl;
-		for (int i = 0; i < 6; i++) {
-			std::cout << i << ": " << list->pHead->data.interest.desiredMajor[i] << " | ";
+	else {
+		if (node->data.gpa > list.pHead->data.gpa) {
+			node->pNextStu = list.pHead;
+			list.pHead->pPreStu = node;
+			list.pHead = node;
 		}
-		std::cout << std::endl << std::endl;
-		list->pHead = list->pHead->pNextStu;
+
+		else if (list.pTail->data.gpa > node->data.gpa) {
+			node->pPreStu = list.pTail;
+			list.pTail->pNextStu = node;
+			list.pTail = node;
+		}
+
+		else {
+			_Student* cur = list.pTail;
+			while (cur != list.pHead && !(cur->data.gpa > node->data.gpa)) cur = cur->pPreStu;
+			node->pNextStu = cur->pNextStu;
+			cur->pNextStu->pPreStu = node;
+			node->pPreStu = cur;
+			cur->pNextStu = node;
+		}
 	}
+}
+
+void insertStuIntoMajors(_Major* majorList, StudentList* stuList) {
+	_Student* pCur = stuList->pHead;
+	while (pCur != nullptr) {
+
+		if (pCur->data.interest.desiredMajor[0] == "" || pCur->data.interest.chosen > 5) pCur = pCur->pNextStu;
+
+		else {
+			_Major* pMajor = majorList;
+
+			while (pMajor->data.shortName != pCur->data.interest.desiredMajor[pCur->data.interest.chosen]) pMajor = pMajor->pNextMajor;
+			if (pMajor->data.quota > 0) { // case remaining
+				_Student* pTmp = pCur;
+
+				if (pCur == stuList->pHead) {
+					stuList->pHead = pCur->pNextStu;
+					stuList->pHead->pPreStu = nullptr;
+				}
+
+				else if (pCur == stuList->pTail) {
+					stuList->pTail = stuList->pTail->pPreStu;
+					stuList->pTail->pNextStu = nullptr;
+				}
+
+				else {
+					pCur->pPreStu->pNextStu = pCur->pNextStu;
+					pCur->pNextStu->pPreStu = pCur->pPreStu;
+				}
+
+				pCur = pCur->pNextStu;
+				insertIntoSortedList(pMajor->data.stuList, pTmp);
+				pMajor->data.quota--;
+
+			}
+
+			else { // case: full slot
+				if (pMajor->data.stuList.pTail->data.gpa > pCur->data.gpa) { // case: pCur < Tail => out
+					if (pCur->data.interest.chosen == 5) pCur = pCur->pNextStu;
+					else pCur->data.interest.chosen++;
+				}
+				else {
+					_Student* tmp = pCur;
+					_Student* tail = pMajor->data.stuList.pTail;
+
+					if (pCur == stuList->pHead) stuList->pHead = tail;
+					else pCur->pPreStu->pNextStu = tail;
+
+					tail->pNextStu = pCur->pNextStu;
+
+					if (pCur == stuList->pTail) stuList->pTail = tail;
+					else pCur->pNextStu->pPreStu = tail;
+
+					pCur = tail;
+					pMajor->data.stuList.pTail = pMajor->data.stuList.pTail->pPreStu;
+					pMajor->data.stuList.pTail->pNextStu = nullptr;
+					pCur->pPreStu = tmp->pPreStu;
+					insertIntoSortedList(pMajor->data.stuList, tmp);
+					++pCur->data.interest.chosen;
+
+				}
+			}
+
+		}
+	}
+}
+
+void deallocatedStudentList(_Student*& stuList) {
+	_Student* pCur = stuList;
+	while (stuList != nullptr) {
+		stuList = stuList->pNextStu;
+		delete pCur;
+		pCur = stuList;
+	}
+}
+
+void deallocatedMajorList(_Major*& majorList) {
+	_Major* pCur = majorList;
 	while (majorList != nullptr) {
-		std::cout << majorList->data.shortName << " - Quota: " << majorList->data.quota << std::endl;
 		majorList = majorList->pNextMajor;
+		deallocatedStudentList(pCur->data.stuList.pHead);
+		delete pCur;
+		pCur = majorList;
+	}
+}
+
+int main() {
+	StudentList* list = readGrading("Grading.csv");
+	std::cout << "Success!" << std::endl;
+	add_Interests("Interests.csv", list);
+	_Major* majorList = creatMajorList("Majors.csv");
+	std::cout << "Success!" << std::endl;
+
+	insertStuIntoMajors(majorList, list);
+
+	std::cout << "Success!" << std::endl;
+	_Major* pCurMajor = majorList;
+	while (pCurMajor != nullptr) {
+		
+		std::cout << "Shorted name: " << pCurMajor->data.shortName << std::endl;
+		_Student* cur = pCurMajor->data.stuList.pHead;
+		int i = 0;
+		std::cout << "Remaining: " << pCurMajor->data.quota << std::endl;
+		while (cur != nullptr) {
+			std::cout << "MSSV: " << cur->data.studentID << " - GPA Foundation: " << cur->data.gpa.GPA_Foundation << std::endl;
+			cur = cur->pNextStu;
+			i++;
+		}
+		std::cout << "number of students: " << i << std::endl;
+		std::cout << std::endl;
+		pCurMajor = pCurMajor->pNextMajor;
 	}
 
-	if (argv[1] == "-all")
+	std::cout << "Others student: " << std::endl;
+	_Student* pCurStu = list->pHead;
+	while (pCurStu != nullptr) {
+		std::cout << "MSSV: " << pCurStu->data.studentID << " " << pCurStu->data.gpa.GPA_Foundation << std::endl;
+		pCurStu = pCurStu->pNextStu;
+	}
+
+	deallocatedStudentList(list->pHead);
+	deallocatedMajorList(majorList);
+
+	/*if (argv[1] == "-all")
 	{
 		fullMajorResult(majorList);
 	}
@@ -377,6 +480,6 @@ int main(int argc, char*argv[]) {
 	else
 	{
 		std::cout << "Invalid choice";
-	}
+	}*/
 	return 0;
 }
