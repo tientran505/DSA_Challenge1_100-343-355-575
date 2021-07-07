@@ -1,6 +1,6 @@
 #include "struct.h"
 
-void fullMajorResult(_Major* head)
+void fullMajorResult(_Major* head, StudentList* failed)
 {
 	std::ofstream fileName;
 	fileName.open("Result.csv");
@@ -21,10 +21,22 @@ void fullMajorResult(_Major* head)
 		curM = curM->pNextMajor;
 	}
 	//in may thang rot 
+
+	_Student* pRun = failed->pHead;
+	while (pRun != nullptr)
+	{
+		fileName << pRun->data.studentID << "," << pRun->data.lastName << "," << pRun->data.firstName << "," << pRun->data.regDate.day << "/" << pRun->data.regDate.month << "/" << pRun->data.regDate.year << ",";
+		for (int i = 0; i < 6; i++)
+		{
+			fileName << pRun->data.interest.desiredMajor[i] << ",";
+		}
+		fileName << "failed" << "," << " " << "," << pRun->data.gpa.GPA_Foundation << "," << pRun->data.gpa.GPA_All << std::endl;
+		pRun = pRun->pNextStu;
+	}
 	fileName.close();
 }
 
-void resultOfOneStu(std::string ID, _Major* head)
+void resultOfOneStu(std::string ID, _Major* head, StudentList* failed)
 {
 	_Major* curM = head;
 	while (curM != nullptr)
@@ -36,24 +48,49 @@ void resultOfOneStu(std::string ID, _Major* head)
 		}
 		if (curS != nullptr)
 		{
-			std::cout << "Student ID:" << curS->data.studentID;
-			std::cout << "Student name:" << curS->data.lastName << " " << curS->data.firstName;
-			std::cout << "Register date:" << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year;
+			std::cout << "Student ID:" << curS->data.studentID << std::endl;
+			std::cout << "Student name:" << curS->data.lastName << " " << curS->data.firstName << std::endl;
+			std::cout << "Register date:" << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year << std::endl;
 			std::cout << "Interests:";
 			for (int i = 0; i < 6; i++)
 			{
 				std::cout << curS->data.interest.desiredMajor[i] << ",";
 			}
-			std::cout << "Result:" << curS->data.interest.desiredMajor[curS->data.interest.chosen] << " " << curS->data.interest.chosen << " ";
-			std::cout << "GPA Foundation:" << curS->data.gpa.GPA_Foundation;
+			std::cout << std::endl << "Result:" << curS->data.interest.desiredMajor[curS->data.interest.chosen] << " " << curS->data.interest.chosen << " " << std::endl;
+			std::cout << "GPA Foundation:" << curS->data.gpa.GPA_Foundation << std::endl;
 			std::cout << "GPA All:" << curS->data.gpa.GPA_All << std::endl;
 			return;
 		}
 		else curM = curM->pNextMajor;
 	}
+
 	if (curM == nullptr)
 	{
-		//ua cai linkly cua may thang rot dau?
+		_Student* pRun = failed->pHead;
+		while (pRun->data.studentID.compare(ID) != 0)
+		{
+			pRun = pRun->pNextStu;
+		}
+		if (pRun != nullptr)
+		{
+			std::cout << "Student ID:" << pRun->data.studentID << std::endl;
+			std::cout << "Student name:" << pRun->data.lastName << " " << pRun->data.firstName << std::endl;
+			std::cout << "Register date:" << pRun->data.regDate.day << "/" << pRun->data.regDate.month << "/" << pRun->data.regDate.year << std::endl;
+			std::cout << "Interests:";
+			for (int i = 0; i < 6; i++)
+			{
+				std::cout << pRun->data.interest.desiredMajor[i] << ",";
+			}
+			std::cout << std::endl << "Result:" << "Failed" << std::endl;
+			std::cout << "GPA Foundation:" << pRun->data.gpa.GPA_Foundation << std::endl;
+			std::cout << "GPA All:" << pRun->data.gpa.GPA_All << std::endl;
+			return;
+		}
+		else
+		{
+			std::cout << "Student is not existed" << std::endl;
+			return;
+		}
 	}
 }
 
@@ -465,15 +502,15 @@ int main() {
 	deallocatedStudentList(list->pHead);
 	deallocatedMajorList(majorList);
 
-	/*if (argv[1] == "-all")
+	/*if (strcmp(argv[1], "-all")==0)
 	{
 		fullMajorResult(majorList);
 	}
-	else if (argv[1] == "-s")
+	else if (strcmp(argv[1], "-s")==0)
 	{
 		resultOfOneStu(argv[2], majorList);
 	}
-	else if (argv[1] == "-m")
+	else if (strcmp(argv[1], "-m")==0)
 	{
 		resultOfOneM(argv[2], majorList);
 	}
