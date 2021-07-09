@@ -109,11 +109,7 @@ void resultOfOneM(std::string shortName, _Major* head) //The result of one speci
 		while (curS != nullptr) //run through all the student nodes in the list
 		{
 			fileName << curS->data.studentID << "," << curS->data.lastName << "," << curS->data.firstName << "," << curS->data.regDate.day << "/" << curS->data.regDate.month << "/" << curS->data.regDate.year << ",";
-			for (int i = 0; i < 6; i++)
-			{
-				fileName << curS->data.interest.desiredMajor[i] << ",";
-			}
-			fileName << curS->data.interest.desiredMajor[curS->data.interest.chosen] << "," << curS->data.interest.chosen + 1  << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
+			fileName << curS->data.interest.chosen + 1  << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
 			curS = curS->pNextStu;
 		}
 		fileName.close();
