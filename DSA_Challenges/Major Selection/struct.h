@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstring>
 
 #include <codecvt>
 #include <locale>
@@ -62,4 +63,4 @@ struct _Major {
 };
 
 
-#endif _STRUCT_H_
+#endif 

@@ -15,7 +15,7 @@ void fullMajorResult(_Major* head, StudentList* failed) //The result of all Majo
 			{
 				fileName << curS->data.interest.desiredMajor[i] << ",";
 			}
-			fileName << curS->data.interest.desiredMajor[curS->data.interest.chosen] << "," << curS->data.interest.chosen << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
+			fileName << curS->data.interest.desiredMajor[curS->data.interest.chosen] << "," << curS->data.interest.chosen + 1 << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
 			curS = curS->pNextStu;
 		}
 		curM = curM->pNextMajor;
@@ -42,7 +42,7 @@ void resultOfOneStu(std::string ID, _Major* head, StudentList* failed) //The res
 	while (curM != nullptr)
 	{
 		_Student* curS = curM->data.stuList.pHead;
-		while (curS->data.studentID.compare(ID) != 0) //check if the student is in this major
+		while (curS!=nullptr && curS->data.studentID.compare(ID) != 0) //check if the student is in this major
 		{
 			curS = curS->pNextStu;
 		}
@@ -54,9 +54,9 @@ void resultOfOneStu(std::string ID, _Major* head, StudentList* failed) //The res
 			std::cout << "Interests:";
 			for (int i = 0; i < 6; i++)
 			{
-				std::cout << curS->data.interest.desiredMajor[i] << ",";
+				std::cout << curS->data.interest.desiredMajor[i] << " ";
 			}
-			std::cout << std::endl << "Result:" << curS->data.interest.desiredMajor[curS->data.interest.chosen] << " " << curS->data.interest.chosen << " " << std::endl;
+			std::cout << std::endl << "Result:" << curS->data.interest.desiredMajor[curS->data.interest.chosen] << " " << curS->data.interest.chosen + 1 << " " << std::endl;
 			std::cout << "GPA Foundation:" << curS->data.gpa.GPA_Foundation << std::endl;
 			std::cout << "GPA All:" << curS->data.gpa.GPA_All << std::endl;
 			return;
@@ -67,7 +67,7 @@ void resultOfOneStu(std::string ID, _Major* head, StudentList* failed) //The res
 	if (curM == nullptr) //if the student cant be found in the major linked list, it means that the student is failed all six interests, check the student in the firstly created linked list
 	{
 		_Student* pRun = failed->pHead;
-		while (pRun->data.studentID.compare(ID) != 0)
+		while (pRun!=nullptr && pRun->data.studentID.compare(ID) != 0)
 		{
 			pRun = pRun->pNextStu;
 		}
@@ -113,7 +113,7 @@ void resultOfOneM(std::string shortName, _Major* head) //The result of one speci
 			{
 				fileName << curS->data.interest.desiredMajor[i] << ",";
 			}
-			fileName << curS->data.interest.desiredMajor[curS->data.interest.chosen] << "," << curS->data.interest.chosen << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
+			fileName << curS->data.interest.desiredMajor[curS->data.interest.chosen] << "," << curS->data.interest.chosen + 1  << "," << curS->data.gpa.GPA_Foundation << "," << curS->data.gpa.GPA_All << std::endl;
 			curS = curS->pNextStu;
 		}
 		fileName.close();
@@ -161,7 +161,7 @@ int compareIDStudent(std::string std1, std::string std2) { // return 1 if std1 >
 	else return 0;
 }
 
-_Student* findStu(_Student* head, _Student* tail, std::string stuID) { 
+_Student* findStu(_Student* head, _Student* tail, std::string stuID) { //find the student with ID
 	if (head->data.studentID == stuID) return head;
 	if (tail->data.studentID == stuID) return tail;
 	_Student* left = head;
@@ -186,13 +186,13 @@ StudentList* readGrading(std::string fileName) {//read file Grading and create a
 		return nullptr;
 	}
 
-	stuList = new StudentList{ nullptr, nullptr };
+	stuList = new StudentList;
 	std::string temp;
 	//getline(fileIn, temp); // skip 1 row
 	_Student* pCur = nullptr;
 
 	while (!fileIn.eof()) {
-		getline(fileIn, temp, ','); //skip first col
+		getline(fileIn, temp, ','); //skip first collumn
 		getline(fileIn, temp, ',');
 
 		if (temp == "") break;
@@ -284,7 +284,7 @@ StudentList* readGrading(std::string fileName) {//read file Grading and create a
 	return stuList;
 }
 
-_Major* creatMajorList(std::string fileName) { //read file Major and create a Major linked list
+_Major* createMajorList(std::string fileName) { //read file Major and create a Major linked list
 	std::ifstream f;
 	f.open(fileName, std::ios::in);
 	if (!f.is_open()) return nullptr;
@@ -332,8 +332,8 @@ void add_Interests(std::string fileName, StudentList* studList) { //read file In
 		_Student* pCur = findStu(studList->pHead, studList->pTail, line); //find the Student with the same ID
 		std::string tmp = line;
 
-		if (pCur == nullptr) getline(f, line);
-		else {
+		if (pCur == nullptr) getline(f, line); //if the student is not existed in Grading file
+		else { //take the Interests information of that student
 			std::string name1;
 			std::string name2;
 			getline(f, name1, ',');
@@ -349,28 +349,28 @@ void add_Interests(std::string fileName, StudentList* studList) { //read file In
 	}
 }
 
-void insertIntoSortedList(StudentList& list, _Student* node) {
+void insertIntoSortedList(StudentList& list, _Student* node) { //Insert a student into a Major
 	node->pNextStu = nullptr;
 	node->pPreStu = nullptr;
-	if (list.pHead == nullptr) {
+	if (list.pHead == nullptr) { //if the student is considered the first one in the list
 		list.pHead = node;
 		list.pTail = node;
 	}
-
-	else {
+	//compare to insert the student for the list to go in order
+	else { //if gpa of cur is bigger than head
 		if (node->data.gpa > list.pHead->data.gpa) {
 			node->pNextStu = list.pHead;
 			list.pHead->pPreStu = node;
 			list.pHead = node;
 		}
 
-		else if (list.pTail->data.gpa > node->data.gpa) {
+		else if (list.pTail->data.gpa > node->data.gpa) { //if gpa of cur is lower than tail
 			node->pPreStu = list.pTail;
 			list.pTail->pNextStu = node;
 			list.pTail = node;
 		}
 
-		else {
+		else { 
 			_Student* cur = list.pTail;
 			while (cur != list.pHead && !(cur->data.gpa > node->data.gpa)) cur = cur->pPreStu;
 			node->pNextStu = cur->pNextStu;
@@ -381,7 +381,7 @@ void insertIntoSortedList(StudentList& list, _Student* node) {
 	}
 }
 
-void insertStuIntoMajors(_Major* majorList, StudentList* stuList) {
+void insertStuIntoMajors(_Major* majorList, StudentList* stuList) {//Insert every students into 6 majors
 	_Student* pCur = stuList->pHead;
 	while (pCur != nullptr) {
 
@@ -446,7 +446,7 @@ void insertStuIntoMajors(_Major* majorList, StudentList* stuList) {
 	}
 }
 
-void deallocatedStudentList(_Student*& stuList) {
+void deallocatedStudentList(_Student*& stuList) { //deallocate student linked list
 	_Student* pCur = stuList;
 	while (stuList != nullptr) {
 		stuList = stuList->pNextStu;
@@ -455,7 +455,7 @@ void deallocatedStudentList(_Student*& stuList) {
 	}
 }
 
-void deallocatedMajorList(_Major*& majorList) {
+void deallocatedMajorList(_Major*& majorList) {//deallocate major linked list
 	_Major* pCur = majorList;
 	while (majorList != nullptr) {
 		majorList = majorList->pNextMajor;
@@ -465,50 +465,48 @@ void deallocatedMajorList(_Major*& majorList) {
 	}
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 	StudentList* list = readGrading("Grading.csv");
-	std::cout << "Success!" << std::endl;
+	//std::cout << "Success!" << std::endl;
 	add_Interests("Interests.csv", list);
-	_Major* majorList = creatMajorList("Majors.csv");
-	std::cout << "Success!" << std::endl;
+	_Major* majorList = createMajorList("Majors.csv");
+	//std::cout << "Success!" << std::endl;
 
 	insertStuIntoMajors(majorList, list);
 
-	std::cout << "Success!" << std::endl;
-	_Major* pCurMajor = majorList;
-	while (pCurMajor != nullptr) {
-		
-		std::cout << "Shorted name: " << pCurMajor->data.shortName << std::endl;
-		_Student* cur = pCurMajor->data.stuList.pHead;
-		int i = 0;
-		std::cout << "Remaining: " << pCurMajor->data.quota << std::endl;
-		while (cur != nullptr) {
-			std::cout << "MSSV: " << cur->data.studentID << " - GPA Foundation: " << cur->data.gpa.GPA_Foundation << std::endl;
-			cur = cur->pNextStu;
-			i++;
-		}
-		std::cout << "number of students: " << i << std::endl;
-		std::cout << std::endl;
-		pCurMajor = pCurMajor->pNextMajor;
-	}
+	//std::cout << "Success!" << std::endl;
+	//_Major* pCurMajor = majorList;
+	//while (pCurMajor != nullptr) {
+	//	
+	//	std::cout << "Shorted name: " << pCurMajor->data.shortName << std::endl;
+	//	_Student* cur = pCurMajor->data.stuList.pHead;
+	//	int i = 0;
+	//	std::cout << "Remaining: " << pCurMajor->data.quota << std::endl;
+	//	while (cur != nullptr) {
+	//		std::cout << "MSSV: " << cur->data.studentID << " - GPA Foundation: " << cur->data.gpa.GPA_Foundation << std::endl;
+	//		cur = cur->pNextStu;
+	//		i++;
+	//	}
+	//	std::cout << "number of students: " << i << std::endl;
+	//	std::cout << std::endl;
+	//	pCurMajor = pCurMajor->pNextMajor;
+	//}
 
-	std::cout << "Others student: " << std::endl;
-	_Student* pCurStu = list->pHead;
-	while (pCurStu != nullptr) {
-		std::cout << "MSSV: " << pCurStu->data.studentID << " " << pCurStu->data.gpa.GPA_Foundation << std::endl;
-		pCurStu = pCurStu->pNextStu;
-	}
+	//std::cout << "Others student: " << std::endl;
+	//_Student* pCurStu = list->pHead;
+	//while (pCurStu != nullptr) {
+	//	std::cout << "MSSV: " << pCurStu->data.studentID << " " << pCurStu->data.gpa.GPA_Foundation << std::endl;
+	//	pCurStu = pCurStu->pNextStu;
+	//}
 
-	deallocatedStudentList(list->pHead);
-	deallocatedMajorList(majorList);
 
-	/*if (strcmp(argv[1], "-all")==0)
+	if (strcmp(argv[1], "-all")==0)
 	{
-		fullMajorResult(majorList);
+		fullMajorResult(majorList,list);
 	}
 	else if (strcmp(argv[1], "-s")==0)
 	{
-		resultOfOneStu(argv[2], majorList);
+		resultOfOneStu(argv[2], majorList,list);
 	}
 	else if (strcmp(argv[1], "-m")==0)
 	{
@@ -517,6 +515,10 @@ int main() {
 	else
 	{
 		std::cout << "Invalid choice";
-	}*/
+	}
+
+
+	deallocatedStudentList(list->pHead);
+	deallocatedMajorList(majorList);
 	return 0;
 }
